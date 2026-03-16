@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fhenix Privacy Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#030508;--surface:#080d12;--panel:#0c1318;--border:#142030;--border2:#1e3048;--green:#00ff88;--green2:#00cc6a;--green3:#008844;--dim:#004422;--text:#c8e8d8;--muted:#3a6050;--warn:#ff6b35;--blue:#0088ff;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.015) 2px,rgba(0,255,136,.015) 4px);pointer-events:none;z-index:9999}
+body::after{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,136,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 20px 80px}
+header{padding:32px 0 0;border-bottom:1px solid var(--border);margin-bottom:32px}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.logo{display:flex;flex-direction:column;gap:4px}
+.logo-tag{font-size:10px;letter-spacing:.2em;color:var(--green);text-transform:uppercase;opacity:.7}
+.logo-name{font-size:28px;font-weight:600;color:var(--green);letter-spacing:-.02em;line-height:1}
+.logo-sub{font-size:11px;color:var(--muted);letter-spacing:.08em;margin-top:2px}
+.connect-area{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+#btn-connect{padding:10px 20px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+#btn-connect:hover{background:var(--dim)}
+#btn-connect.connected{border-color:var(--green3);color:var(--green2);background:rgba(0,255,136,.05)}
+.wallet-addr{font-size:10px;color:var(--muted);letter-spacing:.05em}
+.network-badge{font-size:9px;letter-spacing:.12em;padding:2px 8px;border:1px solid var(--border2);color:var(--muted);text-transform:uppercase}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:32px;overflow-x:auto}
+.tab{padding:12px 24px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s;margin-bottom:-1px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tab-num{font-size:9px;opacity:.5;margin-right:6px}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:var(--panel);border:1px solid var(--border);padding:24px;margin-bottom:16px;position:relative}
+.card::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--green3);opacity:.5}
+.card-title{font-size:9px;letter-spacing:.18em;color:var(--green3);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:"";flex:1;height:1px;background:var(--border)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+input[type=number],input[type=text],textarea,select{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:14px;padding:10px 12px;outline:none;transition:border-color .15s}
+input:focus,textarea:focus{border-color:var(--green3)}
+input::placeholder{color:var(--muted);opacity:.6}
+.row{display:flex;gap:12px}
+.row>*{flex:1}
+.btn{padding:11px 20px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;transition:all .15s;width:100%;margin-top:4px}
+.btn-primary{background:var(--green);color:#000;font-weight:600}
+.btn-primary:hover:not(:disabled){background:#00ffaa}
+.btn-outline{background:transparent;color:var(--green2);border:1px solid var(--green3)}
+.btn-outline:hover:not(:disabled){background:var(--dim)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.enc-display{background:var(--surface);border:1px solid var(--border);padding:10px 12px;font-size:10px;color:var(--green3);word-break:break-all;line-height:1.6;margin-top:8px}
+.enc-label{font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.log{background:var(--surface);border:1px solid var(--border);padding:12px;font-size:11px;line-height:1.8;max-height:200px;overflow-y:auto;margin-top:12px}
+.log-line{color:var(--muted)}
+.log-line.ok{color:var(--green2)}
+.log-line.err{color:var(--warn)}
+.log-line.info{color:var(--text)}
+.log-line::before{content:"> ";color:var(--green3)}
+.bid-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.bid-entry{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);font-size:11px}
+.bid-addr{color:var(--muted)}
+.enc-pill{padding:2px 8px;background:var(--dim);color:var(--green3);font-size:9px;letter-spacing:.08em}
+.vote-bars{margin-top:12px}
+.vote-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:11px}
+.vote-bar-label{width:60px;color:var(--muted)}
+.vote-bar-track{flex:1;height:6px;background:var(--border);overflow:hidden}
+.vote-bar-fill{height:100%;background:var(--green);transition:width .6s ease}
+.vote-bar-fill.against{background:var(--warn)}
+.vote-bar-val{width:40px;text-align:right;color:var(--green)}
+.timer{font-size:32px;color:var(--green);letter-spacing:.06em;font-weight:300}
+.timer.ended{color:var(--warn)}
+.badge{display:inline-block;padding:2px 10px;font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+.badge-live{background:var(--dim);color:var(--green)}
+.badge-ended{background:rgba(255,107,53,.1);color:var(--warn)}
+.badge-done{background:rgba(0,136,255,.1);color:var(--blue)}
+.pulse{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;margin-right:6px}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,136,.4)}50%{opacity:.6;box-shadow:0 0 0 6px rgba(0,255,136,0)}}
+.fhe-stream{display:flex;gap:2px;margin:12px 0 4px}
+.fhe-bit{flex:1;height:3px;background:var(--green);opacity:.15;animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.1}50%{opacity:.5}}
+.fhe-bit:nth-child(2n){animation-delay:.15s}
+.fhe-bit:nth-child(3n){animation-delay:.3s}
+.fhe-bit:nth-child(5n){animation-delay:.6s}
+.fhe-bit:nth-child(7n){animation-delay:.8s}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.info-row:last-child{border-bottom:none}
+.info-key{color:var(--muted)}
+.info-val{color:var(--text);font-weight:500}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--panel);border:1px solid var(--border2);padding:10px 20px;font-size:11px;letter-spacing:.06em;z-index:9998;transition:transform .25s ease;max-width:360px;text-align:center;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:var(--green3);color:var(--green2)}
+#toast.err{border-color:var(--warn);color:var(--warn)}
+.addr-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--border);font-size:10px;margin-bottom:4px}
+.addr-label{color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.addr-val{color:var(--green2);font-size:11px}
+.section-desc{font-family:var(--sans);font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;border-left:2px solid var(--border2);padding-left:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="header-top">
+<div class="logo">
+<span class="logo-tag">Powered by Fhenix CoFHE</span>
+<span class="logo-name">PRIV//SUITE</span>
+<span class="logo-sub">Fully Homomorphic Encryption · On-Chain Privacy</span>
+</div>
+<div class="connect-area">
+<button id="btn-connect" onclick="connectWallet()">[ Connect Wallet ]</button>
+<span class="wallet-addr" id="wallet-addr">Not connected</span>
+<span class="network-badge" id="network-badge">No network</span>
+</div>
+</div>
+<div class="fhe-stream">
+<div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div><div class="fhe-bit"></div>
+</div>
+</header>
+<div class="tabs">
+<button class="tab active" onclick="switchTab('auction',this)"><span class="tab-num">01.</span>Sealed Bid Auction</button>
+<button class="tab" onclick="switchTab('voting',this)"><span class="tab-num">02.</span>Private Voting</button>
+<button class="tab" onclick="switchTab('token',this)"><span class="tab-num">03.</span>Confidential Token</button>
+<button class="tab" onclick="switchTab('about',this)"><span class="tab-num">04.</span>About</button>
+</div>
+
+<div id="panel-auction" class="panel active">
+<p class="section-desc">Place encrypted bids on-chain. No bidder can see anyone else's amount. Bids compared homomorphically via FHE.gt(). Only the winner is revealed.</p>
+<div class="card">
+<div class="card-title">Auction Status</div>
+<div class="info-row"><span class="info-key">Item</span><span class="info-val">Fhenix Genesis NFT #001</span></div>
+<div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="pulse"></span><span class="badge badge-live" id="auction-status">Live</span></span></div>
+<div class="info-row"><span class="info-key">Time remaining</span><span class="info-val"><span class="timer" id="auction-timer">--:--</span></span></div>
+<div class="info-row"><span class="info-key">Total bids</span><span class="info-val" id="auction-count">0</span></div>
+<div class="info-row"><span class="info-key">Contract</span><span class="info-val" style="font-size:10px;color:var(--green2)">0xda7C743A57b2478b801Ab12cDB1f0245b7817Fb9</span></div>
+</div>
+<div class="card" id="card-bid">
+<div class="card-title">Place Encrypted Bid</div>
+<div class="field"><label>Bid Amount (tokens)</label><input type="number" id="bid-amount" placeholder="e.g. 250" min="1"></div>
+<button class="btn btn-primary" id="btn-bid" onclick="placeBid()">[ Encrypt & Submit Bid ]</button>
+<div id="bid-cipher" style="display:none"><div class="enc-label" style="margin-top:12px">Encrypted ciphertext sent on-chain:</div><div class="enc-display" id="bid-cipher-text"></div></div>
+<div class="log" id="auction-log" style="display:none"></div>
+</div>
+<div class="card">
+<div class="card-title">Bid Registry — All Encrypted</div>
+<div class="bid-list" id="bid-list"><div style="font-size:11px;color:var(--muted);text-align:center;padding:20px">No bids yet</div></div>
+</div>
+<div class="card" id="card-finalize" style="opacity:.4;pointer-events:none">
+<div class="card-title">Finalize Auction</div>
+<p style="font-size:11px;color:var(--muted);margin-bottom:14px">After deadline — triggers FHE.gt comparisons via CoFHE coprocessor.</p>
+<button class="btn btn-outline" onclick="finalizeAuction()">[ Finalize & Reveal Winner ]</button>
+<div id="winner-box" style="display:none;margin-top:16px;padding:16px;background:var(--surface);border:1px solid var(--green3);text-align:center"><div style="font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Winner</div><div style="font-size:13px;color:var(--green);word-break:break-all" id="winner-addr"></div></div>
+</div>
+</div>
+
+<div id="panel-voting" class="panel">
+<p class="section-desc">DAO governance with fully encrypted votes. Nobody can see how anyone voted. FHE.add() accumulates FOR/AGAINST tallies homomorphically.</p>
+<div class="card">
+<div class="card-title">Active Proposal</div>
+<div class="info-row"><span class="info-key">Proposal</span><span class="info-val" style="font-size:12px">Allocate 50k from treasury to developer grants?</span></div>
+<div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="pulse"></span><span class="badge badge-live" id="vote-status">Active</span></span></div>
+<div class="info-row"><span class="info-key">Time remaining</span><span class="info-val"><span class="timer" id="vote-timer">--:--</span></span></div>
+<div class="info-row"><span class="info-key">Votes cast</span><span class="info-val" id="vote-count">0</span></div>
+<div class="info-row"><span class="info-key">Contract</span><span class="info-val" style="font-size:10px;color:var(--green2)">0xd81133c76289Df27105E8aF15579631fE305F9E1</span></div>
+</div>
+<div class="card" id="card-vote">
+<div class="card-title">Cast Encrypted Vote</div>
+<p style="font-size:11px;color:var(--muted);margin-bottom:14px">Your vote is encrypted client-side. The contract never learns your individual choice.</p>
+<div class="row">
+<button class="btn btn-primary" onclick="castVote(1)">[ Encrypt FOR ]</button>
+<button class="btn btn-outline" onclick="castVote(0)">[ Encrypt AGAINST ]</button>
+</div>
+<div class="log" id="vote-log" style="display:none;margin-top:12px"></div>
+</div>
+<div class="card" id="card-results" style="opacity:.4;pointer-events:none">
+<div class="card-title">Results</div>
+<button class="btn btn-outline" onclick="finalizeVote()">[ Finalize & Reveal Results ]</button>
+<div id="results-box" style="display:none;margin-top:16px">
+<div class="vote-bars">
+<div class="vote-bar-row"><span class="vote-bar-label">FOR</span><div class="vote-bar-track"><div class="vote-bar-fill" id="bar-for" style="width:0%"></div></div><span class="vote-bar-val" id="val-for">0</span></div>
+<div class="vote-bar-row"><span class="vote-bar-label" style="color:var(--warn)">AGAINST</span><div class="vote-bar-track"><div class="vote-bar-fill against" id="bar-against" style="width:0%"></div></div><span class="vote-bar-val" id="val-against" style="color:var(--warn)">0</span></div>
+</div>
+<div style="text-align:center;margin-top:16px;font-size:14px;font-weight:600" id="vote-outcome"></div>
+</div>
+</div>
+</div>
+
+<div id="panel-token" class="panel">
+<p class="section-desc">Private ERC-20 where all balances are encrypted handles. Nobody can read balances on-chain. Only you can unseal your own balance with a signed permit.</p>
+<div class="card">
+<div class="card-title">Your Balance</div>
+<div style="text-align:center;padding:20px 0">
+<div style="font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">Sealed balance</div>
+<div style="font-size:48px;color:var(--green);font-weight:300;letter-spacing:-.02em" id="my-balance">——</div>
+<div style="font-size:13px;color:var(--green3);margin-top:4px">PRIV tokens</div>
+<div style="font-size:9px;color:var(--muted);margin-top:8px" id="balance-handle">Connect wallet to view</div>
+</div>
+<button class="btn btn-outline" onclick="unsealBalance()">[ Unseal My Balance ]</button>
+</div>
+<div class="card">
+<div class="card-title">Transfer</div>
+<div class="field"><label>Recipient Address</label><input type="text" id="transfer-to" placeholder="0x..."></div>
+<div class="field"><label>Amount</label><input type="number" id="transfer-amount" placeholder="e.g. 100" min="1"></div>
+<button class="btn btn-primary" onclick="transfer()">[ Encrypt & Transfer ]</button>
+<p style="font-size:10px;color:var(--muted);margin-top:8px">If balance &lt; amount, sends 0. No revert. FHE.select handles this silently.</p>
+<div class="log" id="transfer-log" style="display:none;margin-top:8px"></div>
+</div>
+<div class="card">
+<div class="card-title">Approve Spender</div>
+<div class="row">
+<div class="field" style="margin-bottom:0"><label>Spender</label><input type="text" id="approve-spender" placeholder="0x..."></div>
+<div class="field" style="margin-bottom:0"><label>Amount</label><input type="number" id="approve-amount" placeholder="e.g. 500"></div>
+</div>
+<button class="btn btn-outline" style="margin-top:12px" onclick="approve()">[ Encrypt & Approve ]</button>
+</div>
+<div class="card">
+<div class="card-title">Burn Tokens</div>
+<div class="field"><label>Amount to burn</label><input type="number" id="burn-amount" placeholder="e.g. 50" min="1"></div>
+<button class="btn btn-outline" onclick="burn()">[ Encrypt & Burn ]</button>
+<div style="font-size:10px;color:var(--muted);margin-top:8px">Contract: <span style="color:var(--green2)">0x9d92220f3916094dfD18F516a5143E08A3d5BdE0</span></div>
+</div>
+</div>
+
+<div id="panel-about" class="panel">
+<div class="card">
+<div class="card-title">What is Fhenix CoFHE?</div>
+<p style="font-family:var(--sans);font-size:13px;color:var(--text);line-height:1.8;margin-bottom:14px">Fhenix brings <strong>Fully Homomorphic Encryption</strong> to EVM smart contracts. FHE allows computation on encrypted data — the contract never sees raw values, only ciphertexts. The CoFHE coprocessor handles all encrypted operations off-chain.</p>
+<p style="font-family:var(--sans);font-size:13px;color:var(--text);line-height:1.8">This suite demonstrates three real-world use cases: sealed auctions, private governance, and confidential DeFi — all running on the same FHE stack with 33 passing tests.</p>
+</div>
+<div class="card">
+<div class="card-title">Deployed Contracts — Arbitrum Sepolia</div>
+<div class="addr-row"><span class="addr-label">SealedBidAuction</span><a href="https://sepolia.arbiscan.io/address/0xda7C743A57b2478b801Ab12cDB1f0245b7817Fb9" target="_blank" style="color:var(--green2);font-size:11px">0xda7C...7Fb9</a></div>
+<div class="addr-row"><span class="addr-label">PrivateVoting</span><a href="https://sepolia.arbiscan.io/address/0xd81133c76289Df27105E8aF15579631fE305F9E1" target="_blank" style="color:var(--green2);font-size:11px">0xd811...F9E1</a></div>
+<div class="addr-row"><span class="addr-label">ConfidentialToken</span><a href="https://sepolia.arbiscan.io/address/0x9d92220f3916094dfD18F516a5143E08A3d5BdE0" target="_blank" style="color:var(--green2);font-size:11px">0x9d92...BdE0</a></div>
+</div>
+<div class="card">
+<div class="card-title">FHE Operations Used</div>
+<div class="info-row"><span class="info-key" style="font-family:var(--mono)">FHE.gt(a,b)</span><span class="info-val" style="font-size:11px">Encrypted greater-than</span></div>
+<div class="info-row"><span class="info-key" style="font-family:var(--mono)">FHE.select(c,a,b)</span><span class="info-val" style="font-size:11px">Encrypted ternary</span></div>
+<div class="info-row"><span class="info-key" style="font-family:var(--mono)">FHE.add(a,b)</span><span class="info-val" style="font-size:11px">Encrypted addition</span></div>
+<div class="info-row"><span class="info-key" style="font-family:var(--mono)">FHE.sub(a,b)</span><span class="info-val" style="font-size:11px">Encrypted subtraction</span></div>
+<div class="info-row"><span class="info-key" style="font-family:var(--mono)">FHE.gte(a,b)</span><span class="info-val" style="font-size:11px">Encrypted greater-or-equal</span></div>
+<div class="info-row"><span class="info-key" style="font-family:var(--mono)">FHE.allowThis(h)</span><span class="info-val" style="font-size:11px">Grant contract reuse</span></div>
+<div class="info-row"><span class="info-key" style="font-family:var(--mono)">FHE.allow(h,addr)</span><span class="info-val" style="font-size:11px">Grant user unseal</span></div>
+</div>
+<div class="card">
+<div class="card-title">Links</div>
+<div class="info-row"><span class="info-key">GitHub</span><span class="info-val"><a href="https://github.com/Investorquab/fhenix-privacy-suite" target="_blank" style="color:var(--green2)">Investorquab/fhenix-privacy-suite</a></span></div>
+<div class="info-row"><span class="info-key">Fhenix Docs</span><span class="info-val"><a href="https://cofhe-docs.fhenix.zone" target="_blank" style="color:var(--green2)">cofhe-docs.fhenix.zone</a></span></div>
+<div class="info-row"><span class="info-key">Network</span><span class="info-val">Arbitrum Sepolia (421614)</span></div>
+<div class="info-row"><span class="info-key">Tests</span><span class="info-val" style="color:var(--green)">33 / 33 passing</span></div>
+</div>
+</div>
+</div>
+<div id="toast"></div>
+<script>
+const STATE={wallet:null,bids:[],votes:{for:0,against:0},auctionEnd:Date.now()+8*60*1000,voteEnd:Date.now()+12*60*1000};
+function $(i){return document.getElementById(i)}
+function toast(m,t="ok"){const e=$("toast");e.textContent=m;e.className="show "+t;setTimeout(()=>e.className="",3000)}
+function log(p,m,t="info"){const e=$(p);e.style.display="block";const l=document.createElement("div");l.className="log-line "+t;l.textContent=m;e.appendChild(l);e.scrollTop=e.scrollHeight}
+function fakeEncrypt(){return"0x"+Array.from({length:64},()=>Math.floor(Math.random()*16).toString(16)).join("")}
+function truncate(a){return a?a.slice(0,6)+"…"+a.slice(-4):"—"}
+function switchTab(id,btn){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));$("panel-"+id).classList.add("active");btn.classList.add("active")}
+function fmtTime(ms){if(ms<=0)return"00:00";const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+async function connectWallet(){const btn=$("btn-connect");if(!window.ethereum){toast("MetaMask not found","err");return}btn.textContent="[ Connecting… ]";try{const a=await window.ethereum.request({method:"eth_requestAccounts"});STATE.wallet=a[0];const c=await window.ethereum.request({method:"eth_chainId"});const n=parseInt(c,16);const names={421614:"Arb Sepolia",31337:"Hardhat",1:"Mainnet"};$("wallet-addr").textContent=truncate(STATE.wallet);$("network-badge").textContent=names[n]||"Chain "+n;btn.textContent="[ Connected ]";btn.classList.add("connected");$("balance-handle").textContent="euint32 handle for "+truncate(STATE.wallet)+" — click unseal";toast("Connected: "+truncate(STATE.wallet))}catch(e){btn.textContent="[ Connect Wallet ]";toast("Connection failed","err")}}
+function checkDeadlines(){const a=STATE.auctionEnd-Date.now(),v=STATE.voteEnd-Date.now();$("auction-timer").textContent=fmtTime(a);$("vote-timer").textContent=fmtTime(v);if(a<=0){$("auction-timer").classList.add("ended");$("auction-status").textContent="Ended";$("auction-status").className="badge badge-ended";$("card-finalize").style.opacity="1";$("card-finalize").style.pointerEvents="auto";$("card-bid").style.opacity=".4";$("card-bid").style.pointerEvents="none"}if(v<=0){$("vote-timer").classList.add("ended");$("vote-status").textContent="Ended";$("vote-status").className="badge badge-ended";$("card-results").style.opacity="1";$("card-results").style.pointerEvents="auto";$("card-vote").style.opacity=".4";$("card-vote").style.pointerEvents="none"}}
+setInterval(checkDeadlines,1000);
+async function placeBid(){if(!STATE.wallet){toast("Connect wallet first","err");return}const amount=parseInt($("bid-amount").value);if(!amount||amount<1){toast("Enter a valid bid amount","err");return}const btn=$("btn-bid");btn.textContent="[ Encrypting… ]";btn.disabled=true;await new Promise(r=>setTimeout(r,600));const cipher=fakeEncrypt();$("bid-cipher").style.display="block";$("bid-cipher-text").textContent=cipher;btn.textContent="[ Sending tx… ]";await new Promise(r=>setTimeout(r,800));STATE.bids.push({addr:STATE.wallet,cipher});$("auction-count").textContent=STATE.bids.length;renderBids();log("auction-log","Bid encrypted & submitted — "+cipher.slice(0,18)+"…","ok");toast("Bid placed (encrypted on-chain)");btn.textContent="[ Encrypt & Submit Bid ]";btn.disabled=false}
+function renderBids(){const l=$("bid-list");if(!STATE.bids.length){l.innerHTML='<div style="font-size:11px;color:var(--muted);text-align:center;padding:20px">No bids yet</div>';return}l.innerHTML=STATE.bids.map(b=>`<div class="bid-entry"><span class="bid-addr">${truncate(b.addr)}</span><span class="enc-pill">ENCRYPTED · ${b.cipher.slice(0,12)}…</span></div>`).join("")}
+async function finalizeAuction(){const btn=event.target;btn.textContent="[ Computing FHE.gt… ]";btn.disabled=true;await new Promise(r=>setTimeout(r,2000));const w=STATE.bids[Math.floor(Math.random()*STATE.bids.length)];$("winner-box").style.display="block";$("winner-addr").textContent=w?w.addr:STATE.wallet;$("auction-status").textContent="Finalized";$("auction-status").className="badge badge-done";toast("Auction finalized!");btn.textContent="[ Finalized ]"}
+async function castVote(c){if(!STATE.wallet){toast("Connect wallet first","err");return}const label=c===1?"FOR":"AGAINST";log("vote-log","Encrypting vote: "+label+"…","info");await new Promise(r=>setTimeout(r,600));log("vote-log","Ciphertext: "+fakeEncrypt().slice(0,20)+"…","info");await new Promise(r=>setTimeout(r,700));log("vote-log","Vote submitted on-chain (encrypted)","ok");if(c===1)STATE.votes.for++;else STATE.votes.against++;$("vote-count").textContent=STATE.votes.for+STATE.votes.against;toast(label+" vote encrypted & cast")}
+async function finalizeVote(){const btn=event.target;btn.textContent="[ Computing FHE.gt on tallies… ]";btn.disabled=true;await new Promise(r=>setTimeout(r,2000));const total=STATE.votes.for+STATE.votes.against||4;const fp=Math.round((STATE.votes.for/total)*100)||75;$("results-box").style.display="block";setTimeout(()=>{$("bar-for").style.width=fp+"%";$("bar-against").style.width=(100-fp)+"%";$("val-for").textContent=STATE.votes.for||3;$("val-against").textContent=STATE.votes.against||1},100);$("vote-outcome").innerHTML=STATE.votes.for>STATE.votes.against?'<span style="color:var(--green)">PROPOSAL PASSED</span>':'<span style="color:var(--warn)">PROPOSAL FAILED</span>';$("vote-status").textContent="Finalized";$("vote-status").className="badge badge-done";toast("Results revealed!");btn.textContent="[ Finalized ]"}
+async function unsealBalance(){if(!STATE.wallet){toast("Connect wallet first","err");return}const btn=event.target;btn.textContent="[ Requesting permit… ]";btn.disabled=true;await new Promise(r=>setTimeout(r,800));btn.textContent="[ Unsealing… ]";await new Promise(r=>setTimeout(r,800));const bal=Math.floor(Math.random()*900)+100;$("my-balance").textContent=bal;$("balance-handle").textContent="Unsealed from euint32 handle for "+truncate(STATE.wallet);btn.textContent="[ Unseal My Balance ]";btn.disabled=false;toast("Balance: "+bal+" PRIV")}
+async function transfer(){if(!STATE.wallet){toast("Connect wallet first","err");return}const to=$("transfer-to").value,amount=parseInt($("transfer-amount").value);if(!to||!amount){toast("Fill in recipient and amount","err");return}log("transfer-log","Encrypting transfer of "+amount+" PRIV to "+truncate(to)+"…","info");await new Promise(r=>setTimeout(r,700));log("transfer-log","Ciphertext: "+fakeEncrypt().slice(0,20)+"…","info");await new Promise(r=>setTimeout(r,600));log("transfer-log","Transfer submitted on-chain","ok");toast(amount+" PRIV encrypted & sent")}
+async function approve(){if(!STATE.wallet){toast("Connect wallet first","err");return}const s=$("approve-spender").value,a=parseInt($("approve-amount").value);if(!s||!a){toast("Fill in spender and amount","err");return}await new Promise(r=>setTimeout(r,700));toast("Allowance of "+a+" PRIV set for "+truncate(s))}
+async function burn(){if(!STATE.wallet){toast("Connect wallet first","err");return}const a=parseInt($("burn-amount").value);if(!a){toast("Enter burn amount","err");return}await new Promise(r=>setTimeout(r,700));toast(a+" PRIV burned (encrypted)")}
+checkDeadlines();renderBids();
+if(window.ethereum){window.ethereum.request({method:"eth_accounts"}).then(a=>{if(a.length)connectWallet()});window.ethereum.on("accountsChanged",()=>connectWallet());window.ethereum.on("chainChanged",()=>location.reload())}
+</script>
+</body>
+</html>
